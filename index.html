@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Website game Kasui</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #f9f9f9, #e0f7fa);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      background-color: #00838f;
+      color: white;
+      padding: 20px 0;
+      margin: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .game-selection {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .game-card {
+      cursor: pointer;
+      width: 200px;
+      border-radius: 12px;
+      background: white;
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .game-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .game-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-bottom: 1px solid #ddd;
+    }
+    .game-card p {
+      font-size: 18px;
+      margin: 12px 0;
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      background-color: #00838f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #006064;
+    }
+    #message {
+      font-weight: bold;
+      margin: 15px 0;
+      font-size: 20px;
+    }
+
+    /* === Cờ Caro === */
+    #caro-game {
+      margin-top: 20px;
+      display: none;
+    }
+    #caro-board {
+      margin: 0 auto;
+      display: grid;
+      justify-content: center;
+      grid-template-columns: repeat(10, 40px);
+      grid-template-rows: repeat(10, 40px);
+      width: max-content;
+      border: 2px solid #00838f;
+      border-radius: 8px;
+      background: white;
+    }
+    .caro-cell {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #333;
+      line-height: 40px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 22px;
+      user-select: none;
+      background: white;
+    }
+    .caro-cell:hover {
+      background-color: #e0f7fa;
+    }
+
+    /* === Cờ Vua === */
+    #chess-game {
+      margin-top: 20px;
+      display: none;
+      user-select: none;
+    }
+    #chess-board {
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(8, 50px);
+      grid-template-rows: repeat(8, 50px);
+      width: 400px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .chess-cell {
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      font-size: 36px;
+      cursor: pointer;
+    }
+    .chess-cell.light {
+      background-color: #f0d9b5;
+    }
+    .chess-cell.dark {
+      background-color: #b58863;
+    }
+    .chess-cell.selected {
+      outline: 3px solid yellow;
+    }
+
+    /* === Xe Tăng === */
+    #tank-game {
+      margin-top: 20px;
+      display: none;
+      position: relative;
+      user-select: none;
+    }
+    #tank-canvas {
+      background-color: #222;
+      display: block;
+      margin: 20px auto;
+      border-radius: 10px;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>🎮 Website game Kasui</h1>
+
+  <div class="game-selection">
+    <div class="game-card" onclick="openGame('caro')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Gomoku_board_game.svg" alt="Cờ Caro" />
+      <p>Cờ Caro</p>
+    </div>
+    <div class="game-card" onclick="openGame('chess')">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/bd/Chess_Pieces_Sprite.svg" alt="Cờ Vua" />
+      <p>Cờ Vua</p>
+    </div>
+    <div class="game-card" onclick="openGame('tank')">
+      <img src="https://cdn-icons-png.flaticon.com/512/167/167707.png" alt="Game Xe Tăng" />
+      <p>Xe Tăng Bắn Nhau</p>
+    </div>
+  </div>
+
+  <div id="message"></div>
+
+  <!-- Cờ Caro -->
+  <div id="caro-game">
+    <button onclick="goBack()">🔙 Quay lại</button>
+    <p>Chơi Cờ Caro - Click ô để đánh</p>
+    <div id="caro-board"></div>
+    <p>Chế độ: <button onclick="setCaroMode('player')">2 người</button> <button onclick="setCaroMode('bot')">Chơi với máy</button></p>
+  </div>
+
+  <!-- Cờ Vua -->
+  <div id="chess-game">
+    <button onclick="goBack()">🔙 Quay lại</button>
+    <div id="chess-board"></div>
+    <button onclick="resetChessGame()">Reset Cờ Vua</button>
+  </div>
+
+  <!-- Xe Tăng -->
+  <div id="tank-game">
+    <button onclick="goBack()">🔙 Quay lại</button>
+    <canvas id="tank-canvas" width="600" height="400"></canvas>
+  </div>
+
+  <script>
+    // === QUẢN LÝ CHUNG ===
+    function goBack(){
+      document.getElementById('message').textContent = '';
+      ['caro-game','chess-game','tank-game'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.querySelector('.game-selection').style.display = 'flex';
+    }
+
+    function openGame(game){
+      document.getElementById('message').textContent = '';
+      document.querySelector('.game-selection').style.display = 'none';
+      ['caro-game','chess-game','tank-game'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      if(game === 'caro'){
+        document.getElementById('caro-game').style.display = 'block';
+        startCaroGame();
+      } else if(game === 'chess'){
+        document.getElementById('chess-game').style.display = 'block';
+        initChessBoard();
+      } else if(game === 'tank'){
+        document.getElementById('tank-game').style.display = 'block';
+        startTankGame();
+      }
+    }
+
+    // ================== CỜ CARO =====================
+    let caroBoard = [];
+    let caroSize = 10;
+    let caroCurrentPlayer = 'X';
+    let caroMode = 'player'; // player hoặc bot
+
+    function startCaroGame(){
+      caroCurrentPlayer = 'X';
+      caroBoard = Array(caroSize).fill(null).map(() => Array(caroSize).fill(''));
+      renderCaroBoard();
+      document.getElementById('message').textContent = 'Lượt người chơi: ' + caroCurrentPlayer;
+    }
+
+    function setCaroMode(mode){
+      caroMode = mode;
+      startCaroGame();
+    }
+
+    function renderCaroBoard(){
+      const boardEl = document.getElementById('caro-board');
+      boardEl.innerHTML = '';
+      boardEl.style.gridTemplateColumns = `repeat(${caroSize}, 40px)`;
+      for(let i=0; i<caroSize; i++){
+        for(let j=0; j<caroSize; j++){
+          const cell = document.createElement('div');
+          cell.className = 'caro-cell';
+          cell.textContent = caroBoard[i][j];
+          cell.dataset.row = i;
+          cell.dataset.col = j;
+          cell.onclick = () => caroCellClick(i,j);
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function caroCellClick(r,c){
+      if(caroBoard[r][c] !== '') return;
+      caroBoard[r][c] = caroCurrentPlayer;
+      renderCaroBoard();
+
+      if(checkCaroWin(r,c)){
+        alert(`Người chơi ${caroCurrentPlayer} thắng!`);
+        return;
+      }
+
+      if(caroMode === 'bot'){
+        caroCurrentPlayer = 'O';
+        let [br, bc] = caroBotMove();
+        if(br !== -1){
+          caroBoard[br][bc] = caroCurrentPlayer;
+          renderCaroBoard();
+          if(checkCaroWin(br,bc)){
+            alert('Máy thắng!');
+          }
+        }
+        caroCurrentPlayer = 'X';
+      } else {
+        caroCurrentPlayer = caroCurrentPlayer === 'X' ? 'O' : 'X';
+      }
+      document.getElementById('message').textContent = 'Lượt người chơi: ' + caroCurrentPlayer;
+    }
+
+    function checkCaroWin(r,c){
+      let player = caroBoard[r][c];
+      const directions = [[1,0],[0,1],[1,1],[1,-1]];
+      for(let [dx,dy] of directions){
+        let count = 1;
+        for(let i=1; i<5; i++){
+          let x = r+dx*i, y = c+dy*i;
+          if(x<0 || y<0 || x>=caroSize || y>=caroSize || caroBoard[x][y] !== player) break;
+          count++;
+        }
+        for(let i=1; i<5; i++){
+          let x = r-dx*i, y = c-dy*i;
+          if(x<0 || y<0 || x>=caroSize || y>=caroSize || caroBoard[x][y] !== player) break;
+          count++;
+        }
+        if(count >=5) return true;
+      }
+      return false;
+    }
+
+    // Bot đơn giản đánh random ô trống gần nước đi người chơi
+    function caroBotMove(){
+      // Ưu tiên nước đi thắng hoặc chặn thua:
+      for(let i=0;i<caroSize;i++){
+        for(let j=0;j<caroSize;j++){
+          if(caroBoard[i][j] === ''){
+            caroBoard[i][j] = 'O';
+            if(checkCaroWin(i,j)){
+              caroBoard[i][j] = '';
+              return [i,j];
+            }
+            caroBoard[i][j] = '';
+          }
+        }
+      }
+      for(let i=0;i<caroSize;i++){
+        for(let j=0;j<caroSize;j++){
+          if(caroBoard[i][j] === ''){
+            caroBoard[i][j] = 'X';
+            if(checkCaroWin(i,j)){
+              caroBoard[i][j] = '';
+              return [i,j];
+            }
+            caroBoard[i][j] = '';
+          }
+        }
+      }
+      // Nếu không có nước thắng hoặc chặn, chọn ô trống đầu tiên
+      for(let i=0;i<caroSize;i++){
+        for(let j=0;j<caroSize;j++){
+          if(caroBoard[i][j] === '') return [i,j];
+        }
+      }
+      return [-1,-1];
+    }
+
+    // ================== CỜ VUA =====================
+    const chessUnicode = {
+      'white': {
+        'K':'♔','Q':'♕','R':'♖','B':'♗','N':'♘','P':'♙'
+      },
+      'black': {
+        'K':'♚','Q':'♛','R':'♜','B':'♝','N':'♞','P':'♟'
+      }
+    };
+    let chessBoard = [];
+    let chessTurn = 'white';
+    let selectedCell = null;
+
+    function initChessBoard(){
+      // Bảng cờ 8x8
+      chessBoard = [
+        ['bR','bN','bB','bQ','bK','bB','bN','bR'],
+        ['bP','bP','bP','bP','bP','bP','bP','bP'],
+        ['','','','','','','',''],
+        ['','','','','','','',''],
+        ['','','','','','','',''],
+        ['','','','','','','',''],
+        ['wP','wP','wP','wP','wP','wP','wP','wP'],
+        ['wR','wN','wB','wQ','wK','wB','wN','wR'],
+      ];
+      chessTurn = 'white';
+      selectedCell = null;
+      renderChessBoard();
+      updateChessMessage();
+    }
+
+    function renderChessBoard(){
+      const boardEl = document.getElementById('chess-board');
+      boardEl.innerHTML = '';
+      for(let i=0;i<8;i++){
+        for(let j=0;j<8;j++){
+          const cell = document.createElement('div');
+          cell.classList.add('chess-cell');
+          if((i+j)%2===0) cell.classList.add('light');
+          else cell.classList.add('dark');
+
+          cell.dataset.row = i;
+          cell.dataset.col = j;
+
+          let piece = chessBoard[i][j];
+          if(piece){
+            let color = piece[0] === 'w' ? 'white' : 'black';
+            let type = piece[1];
+            cell.textContent = chessUnicode[color][type.toUpperCase()];
+          }
+          if(selectedCell && selectedCell[0]===i && selectedCell[1]===j){
+            cell.classList.add('selected');
+          }
+          cell.onclick = () => chessCellClick(i,j);
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function chessCellClick(r,c){
+      let piece = chessBoard[r][c];
+      if(selectedCell){
+        // Nếu đã chọn ô, kiểm tra di chuyển
+        if(canMove(selectedCell[0],selectedCell[1],r,c)){
+          moveChessPiece(selectedCell[0],selectedCell[1],r,c);
+          chessTurn = chessTurn === 'white' ? 'black' : 'white';
+          selectedCell = null;
+          renderChessBoard();
+          updateChessMessage();
+        } else {
+          // Nếu bấm lại ô khác cùng màu, đổi chọn
+          if(piece && getColor(piece) === chessTurn){
+            selectedCell = [r,c];
+            renderChessBoard();
+          } else {
+            // Không di chuyển, giữ nguyên chọn
+          }
+        }
+      } else {
+        // Chưa chọn ô nào, chọn ô nếu đúng lượt
+        if(piece && getColor(piece) === chessTurn){
+          selectedCell = [r,c];
+          renderChessBoard();
+        }
+      }
+    }
+
+    function getColor(piece){
+      return piece[0] === 'w' ? 'white' : 'black';
+    }
+
+    function canMove(r1,c1,r2,c2){
+      let piece = chessBoard[r1][c1];
+      if(!piece) return false;
+      if(r1 === r2 && c1 === c2) return false;
+      let target = chessBoard[r2][c2];
+      if(target && getColor(target) === getColor(piece)) return false;
+      let type = piece[1].toLowerCase();
+      let dr = r2 - r1;
+      let dc = c2 - c1;
+
+      switch(type){
+        case 'p': return canMovePawn(r1,c1,r2,c2,piece);
+        case 'r': return canMoveRook(r1,c1,r2,c2);
+        case 'n': return canMoveKnight(dr,dc);
+        case 'b': return canMoveBishop(r1,c1,r2,c2);
+        case 'q': return canMoveQueen(r1,c1,r2,c2);
+        case 'k': return canMoveKing(dr,dc);
+      }
+      return false;
+    }
+
+    function canMovePawn(r1,c1,r2,c2,piece){
+      let color = getColor(piece);
+      let dir = color === 'white' ? -1 : 1;
+      let startRow = color === 'white' ? 6 : 1;
+      let dr = r2 - r1;
+      let dc = c2 - c1;
+      // Di chuyển 1 ô thẳng
+      if(dc === 0){
+        if(dr === dir && !chessBoard[r2][c2]) return true;
+        if(r1 === startRow && dr === 2*dir && !chessBoard[r1+dir][c1] && !chessBoard[r2][c2]) return true;
+      }
+      // Ăn chéo
+      if(Math.abs(dc) === 1 && dr === dir && chessBoard[r2][c2] && getColor(chessBoard[r2][c2]) !== color) return true;
+      return false;
+    }
+
+    function canMoveRook(r1,c1,r2,c2){
+      if(r1 !== r2 && c1 !== c2) return false;
+      return isPathClear(r1,c1,r2,c2);
+    }
+
+    function canMoveKnight(dr, dc){
+      return (Math.abs(dr) === 2 && Math.abs(dc) === 1) || (Math.abs(dr) === 1 && Math.abs(dc) === 2);
+    }
+
+    function canMoveBishop(r1,c1,r2,c2){
+      if(Math.abs(r2-r1) !== Math.abs(c2-c1)) return false;
+      return isPathClear(r1,c1,r2,c2);
+    }
+
+    function canMoveQueen(r1,c1,r2,c2){
+      if(r1 === r2 || c1 === c2) return isPathClear(r1,c1,r2,c2);
+      if(Math.abs(r2-r1) === Math.abs(c2-c1)) return isPathClear(r1,c1,r2,c2);
+      return false;
+    }
+
+    function canMoveKing(dr,dc){
+      return Math.abs(dr) <= 1 && Math.abs(dc) <= 1;
+    }
+
+    function isPathClear(r1,c1,r2,c2){
+      let dr = Math.sign(r2-r1);
+      let dc = Math.sign(c2-c1);
+      let x = r1 + dr;
+      let y = c1 + dc;
+      while(x !== r2 || y !== c2){
+        if(chessBoard[x][y] !== '') return false;
+        x += dr;
+        y += dc;
+      }
+      return true;
+    }
+
+    function moveChessPiece(r1,c1,r2,c2){
+      chessBoard[r2][c2] = chessBoard[r1][c1];
+      chessBoard[r1][c1] = '';
+    }
+
+    function updateChessMessage(){
+      document.getElementById('message').textContent = `Lượt chơi: ${chessTurn.toUpperCase()}`;
+    }
+
+    function resetChessGame(){
+      initChessBoard();
+      document.getElementById('message').textContent = '';
+    }
+
+    // ================== XE TĂNG =====================
+    let tankCanvas, tankCtx;
+    let tankWidth = 40, tankHeight = 30;
+    let bullets = [];
+
+    let tank1 = {
+      x: 100, y: 350,
+      width: tankWidth, height: tankHeight,
+      speed: 3,
+      color: 'red',
+      angle: 0,
+      dir: 0,
+      turretLength: 20
+    };
+    let tank2 = {
+      x: 460, y: 50,
+      width: tankWidth, height: tankHeight,
+      speed: 3,
+      color: 'blue',
+      angle: Math.PI,
+      dir: 0,
+      turretLength: 20
+    };
+
+    let keys = {};
+
+    function startTankGame(){
+      tankCanvas = document.getElementById('tank-canvas');
+      tankCtx = tankCanvas.getContext('2d');
+      bullets = [];
+      tank1.x = 100; tank1.y = 350; tank1.angle = 0;
+      tank2.x = 460; tank2.y = 50; tank2.angle = Math.PI;
+      keys = {};
+      window.addEventListener('keydown', tankKeyDown);
+      window.addEventListener('keyup', tankKeyUp);
+      requestAnimationFrame(tankLoop);
+    }
+
+    function tankKeyDown(e){
+      keys[e.key.toLowerCase()] = true;
+      e.preventDefault();
+    }
+
+    function tankKeyUp(e){
+      keys[e.key.toLowerCase()] = false;
+      e.preventDefault();
+    }
+
+    function tankLoop(){
+      updateTank(tank1, 'w','s','a','d',' ');
+      updateTank(tank2, 'i','k','j','l','Enter');
+      updateBullets();
+      drawTankGame();
+      requestAnimationFrame(tankLoop);
+    }
+
+    function updateTank(tank, up, down, left, right, shootKey){
+      if(keys[left]) tank.angle -= 0.05;
+      if(keys[right]) tank.angle += 0.05;
+      if(keys[up]){
+        tank.x += Math.cos(tank.angle) * tank.speed;
+        tank.y += Math.sin(tank.angle) * tank.speed;
+      }
+      if(keys[down]){
+        tank.x -= Math.cos(tank.angle) * tank.speed;
+        tank.y -= Math.sin(tank.angle) * tank.speed;
+      }
+      if(keys[shootKey.toLowerCase()]){
+        shootBullet(tank);
+        keys[shootKey.toLowerCase()] = false; // Để bắn 1 viên / nhấn
+      }
+      // Giới hạn trong canvas
+      tank.x = Math.min(Math.max(tank.x, tank.width/2), tankCanvas.width - tank.width/2);
+      tank.y = Math.min(Math.max(tank.y, tank.height/2), tankCanvas.height - tank.height/2);
+    }
+
+    function shootBullet(tank){
+      // Tạo viên đạn ở đầu turret
+      let bullet = {
+        x: tank.x + Math.cos(tank.angle)*tank.turretLength,
+        y: tank.y + Math.sin(tank.angle)*tank.turretLength,
+        dx: Math.cos(tank.angle)*6,
+        dy: Math.sin(tank.angle)*6,
+        color: tank.color,
+        radius: 5,
+        owner: tank
+      };
+      bullets.push(bullet);
+    }
+
+    function updateBullets(){
+      bullets = bullets.filter(bullet => {
+        bullet.x += bullet.dx;
+        bullet.y += bullet.dy;
+        // Kiểm tra va chạm với tank 1 hoặc tank 2
+        if(collideTank(bullet, tank1) && bullet.owner !== tank1){
+          alert('Xe tăng màu đỏ bị trúng đạn! Trò chơi kết thúc.');
+          goBack();
+          return false;
+        }
+        if(collideTank(bullet, tank2) && bullet.owner !== tank2){
+          alert('Xe tăng màu xanh bị trúng đạn! Trò chơi kết thúc.');
+          goBack();
+          return false;
+        }
+        // Loại đạn ra khỏi canvas
+        if(bullet.x < 0 || bullet.x > tankCanvas.width || bullet.y < 0 || bullet.y > tankCanvas.height){
+          return false;
+        }
+        return true;
+      });
+    }
+
+    function collideTank(bullet, tank){
+      return bullet.x > tank.x - tank.width/2 &&
+             bullet.x < tank.x + tank.width/2 &&
+             bullet.y > tank.y - tank.height/2 &&
+             bullet.y < tank.y + tank.height/2;
+    }
+
+    function drawTankGame(){
+      tankCtx.clearRect(0,0,tankCanvas.width,tankCanvas.height);
+      drawTank(tank1);
+      drawTank(tank2);
+      for(let b of bullets){
+        tankCtx.beginPath();
+        tankCtx.fillStyle = b.color;
+        tankCtx.arc(b.x,b.y,b.radius,0,Math.PI*2);
+        tankCtx.fill();
+      }
+    }
+
+    function drawTank(tank){
+      // Thân tank
+      tankCtx.save();
+      tankCtx.translate(tank.x,tank.y);
+      tankCtx.rotate(tank.angle);
+
+      tankCtx.fillStyle = tank.color;
+      tankCtx.fillRect(-tank.width/2, -tank.height/2, tank.width, tank.height);
+
+      // Tháp pháo (turret)
+      tankCtx.fillStyle = 'gray';
+      tankCtx.fillRect(0, -5, tank.turretLength, 10);
+
+      tankCtx.restore();
+    }
+  </script>
+</body>
+</html>
